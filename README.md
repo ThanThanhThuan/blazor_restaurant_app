@@ -1,6 +1,6 @@
 # Blazor WebAssembly Frontend - Restaurant App
   
-3. Frontend Summary (Blazor WASM)
+Frontend Summary (Blazor WASM)
 
 Tech Stack: C# (.NET 8), Blazor WebAssembly, Tailwind CSS, Lucide.Blazor.
 
