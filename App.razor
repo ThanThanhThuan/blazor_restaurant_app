@@ -1,0 +1,13 @@
+﻿<Router AppAssembly="@typeof(App).Assembly">
+    <Found Context="routeData">
+        <!-- Ensure this line uses MainLayout -->
+        <RouteView RouteData="@routeData" DefaultLayout="@typeof(RestaurantBlazor.Layout.MainLayout)" />
+        <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+    </Found>
+    <NotFound>
+        <PageTitle>Not found</PageTitle>
+        <LayoutView Layout="@typeof(RestaurantBlazor.Layout.MainLayout)">
+            <p role="alert" class="p-10 text-center">Sorry, there's nothing at this address.</p>
+        </LayoutView>
+    </NotFound>
+</Router>

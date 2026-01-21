@@ -1,0 +1,232 @@
+@page "/reservation"
+@using RestaurantBlazor.Models
+@inject HttpClient Http
+@inject NavigationManager Nav
+@inject IJSRuntime JS 
+
+<div class="min-h-screen bg-[#fcfcfc] flex flex-col relative overflow-hidden pb-10">
+    <!-- Header -->
+    <header class="pt-8 px-6 flex justify-center items-center relative z-10">
+      <div class="text-2xl font-serif font-bold tracking-widest text-center">
+        The Culinary Heaven Group
+      </div>
+    </header>
+
+    <main class="flex-grow flex flex-col items-center justify-center px-4 py-8 relative z-10 w-full max-w-4xl mx-auto">
+      
+      <!-- Back Button -->
+      <div class="w-full mb-4 flex justify-between items-center">
+        <button @click="GoBack" class="flex items-center text-gray-500 hover:text-black transition group">
+          <LucideIcon Name="LucideIcons.ArrowLeft" class="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" />
+          <span class="uppercase text-sm tracking-widest font-semibold">Back</span>
+        </button>
+      </div>
+
+      <h1 class="text-5xl font-serif mb-8 text-center">Reservation</h1>
+
+      <!-- Summary Label -->
+      <div class="w-full bg-white border-l-4 border-gold shadow-sm rounded-r-md p-4 mb-6 flex flex-wrap justify-between items-center gap-4">
+        <div class="flex items-center space-x-2">
+          <LucideIcon Name="LucideIcons.User" class="w-4 h-4 text-gold" />
+          <span class="text-sm font-bold uppercase tracking-wider text-gray-600">Guests: <span class="text-black">@selectedPeople</span></span>
+        </div>
+        <div class="flex items-center space-x-2">
+          <LucideIcon Name="LucideIcons.Calendar" class="w-4 h-4 text-gold" />
+          <span class="text-sm font-bold uppercase tracking-wider text-gray-600">Date: <span class="text-black">@FullDateString</span></span>
+        </div>
+        <div class="flex items-center space-x-2">
+          <LucideIcon Name="LucideIcons.Clock" class="w-4 h-4 text-gold" />
+          <span class="text-sm font-bold uppercase tracking-wider text-gray-600">Time: <span class="text-black">@(selectedTime ?? "--:--")</span></span>
+        </div>
+      </div>
+
+      <div class="w-full bg-white shadow-xl rounded-sm border border-gray-100 p-8 min-h-[500px] flex flex-col">
+        
+        <!-- Progress Bar -->
+        <div class="flex justify-center space-x-2 mb-8">
+           <div class="h-1 w-16 transition-all duration-300 @(currentStep >= 1 ? "bg-gold" : "bg-gray-200")"></div>
+           <div class="h-1 w-16 transition-all duration-300 @(currentStep >= 2 ? "bg-gold" : "bg-gray-200")"></div>
+           <div class="h-1 w-16 transition-all duration-300 @(currentStep >= 3 ? "bg-gold" : "bg-gray-200")"></div>
+        </div>
+
+        <!-- Step 1: People -->
+        @if (currentStep == 1)
+        {
+            <div class="flex-grow animate-fade-in">
+              <h2 class="text-center text-xl uppercase tracking-widest mb-10 text-gray-600">Number of people</h2>
+              <div class="grid grid-cols-4 md:grid-cols-5 gap-4">
+                @foreach (var num in Enumerable.Range(1, 20))
+                {
+                    <button @onclick="() => SelectPeople(num)"
+                      class="h-12 border border-gray-200 hover:border-gold hover:text-gold hover:bg-gold/5 transition flex items-center justify-center font-serif text-lg @(selectedPeople == num ? "bg-gold text-white border-gold" : "")">
+                      @num
+                    </button>
+                }
+              </div>
+            </div>
+        }
+
+        <!-- Step 2: Date -->
+        @if (currentStep == 2)
+        {
+            <div class="flex-grow animate-fade-in">
+              <h2 class="text-center text-xl uppercase tracking-widest mb-6 text-gray-600">For what date?</h2>
+              
+              <div class="flex justify-between items-center mb-6 px-4">
+                <button @onclick="PrevMonth" class="text-gray-400 hover:text-black transition">
+                    <LucideIcon Name="LucideIcons.ChevronLeft" />
+                </button>
+                <span class="font-serif text-2xl w-48 text-center">@CurrentMonthName</span>
+                <button @onclick="NextMonth" class="text-gray-400 hover:text-black transition">
+                    <LucideIcon Name="LucideIcons.ChevronRight" />
+                </button>
+              </div>
+
+              <div class="grid grid-cols-7 gap-2 text-center mb-2">
+                @foreach(var day in weekDays) { <div class="text-xs font-bold text-gray-400">@day</div> }
+              </div>
+              
+              <div class="grid grid-cols-7 gap-2">
+                @for(int i = 0; i < FirstDayPadding; i++) { <div></div> }
+                
+                @for(int d = 1; d <= DaysInMonth; d++)
+                {
+                    int day = d;
+                    bool isPast = IsDatePast(day);
+                    
+                    <button @onclick="() => SelectDate(day)" disabled="@isPast"
+                      class="h-10 w-10 mx-auto flex items-center justify-center rounded-full hover:bg-gray-100 transition font-serif 
+                      @(selectedDay == day ? "bg-gold text-white hover:bg-gold" : "")
+                      @(isPast ? "text-gray-300 cursor-not-allowed hover:bg-transparent" : "")">
+                      @day
+                    </button>
+                }
+              </div>
+            </div>
+        }
+
+        <!-- Step 3: Time -->
+        @if (currentStep == 3)
+        {
+            <div class="flex-grow animate-fade-in">
+              <h2 class="text-center text-xl uppercase tracking-widest mb-10 text-gray-600">At what time?</h2>
+              <div class="grid grid-cols-3 md:grid-cols-4 gap-4">
+                @foreach (var time in timeSlots)
+                {
+                    <button @onclick="() => SelectTime(time)"
+                      class="h-12 border border-gray-200 hover:border-gold hover:text-gold hover:bg-gold/5 transition flex items-center justify-center text-sm font-bold tracking-wider @(selectedTime == time ? "bg-gold text-white border-gold" : "")">
+                      @time
+                    </button>
+                }
+              </div>
+              
+              <div class="mt-12 text-center">
+                 <button @onclick="SubmitReservation" disabled="@(string.IsNullOrEmpty(selectedTime) || isSubmitting)"
+                   class="bg-black text-white px-16 py-4 uppercase tracking-[0.2em] hover:bg-gold transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center mx-auto">
+                   @if(isSubmitting) { <LucideIcon Name="LucideIcons.Loader2" class="animate-spin mr-2" /> <span>Loading...</span> } else { <span>Reserve a table</span> }
+                 </button>
+              </div>
+            </div>
+        }
+
+      </div>
+    </main>
+</div>
+
+@code {
+    private int currentStep = 1;
+    private bool isSubmitting = false;
+    private int selectedPeople = 2;
+    private int? selectedDay = DateTime.Now.Day;
+    private string? selectedTime;
+    
+    private DateTime currentDate = DateTime.Now;
+    private DateTime viewDate = DateTime.Now;
+
+    private string[] weekDays = { "SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT" };
+    private string[] timeSlots = { "12:30", "12:45", "13:00", "18:00", "18:30", "19:00", "19:30", "20:00" };
+
+    private string CurrentMonthName => viewDate.ToString("MMMM yyyy");
+    private int DaysInMonth => DateTime.DaysInMonth(viewDate.Year, viewDate.Month);
+    private int FirstDayPadding => (int)new DateTime(viewDate.Year, viewDate.Month, 1).DayOfWeek;
+
+    private string FullDateString => selectedDay.HasValue 
+        ? new DateTime(viewDate.Year, viewDate.Month, selectedDay.Value).ToString("ddd, MMM dd yyyy") 
+        : "Select Date";
+
+    private void NextMonth() 
+    {
+        viewDate = viewDate.AddMonths(1);
+        selectedDay = null;
+    }
+
+    private void PrevMonth() 
+    {
+        if (viewDate.Month == currentDate.Month && viewDate.Year == currentDate.Year) return;
+        viewDate = viewDate.AddMonths(-1);
+        selectedDay = null;
+    }
+
+    private bool IsDatePast(int day)
+    {
+        if (viewDate.Year > currentDate.Year) return false;
+        if (viewDate.Year == currentDate.Year && viewDate.Month > currentDate.Month) return false;
+        return day < currentDate.Day;
+    }
+
+    private void SelectPeople(int num) 
+    {
+        selectedPeople = num;
+        currentStep = 2;
+    }
+
+    private void SelectDate(int day) 
+    {
+        selectedDay = day;
+        currentStep = 3;
+    }
+
+    private void SelectTime(string time) 
+    {
+        selectedTime = time;
+    }
+
+    private void GoBack() 
+    {
+        if (currentStep > 1) currentStep--;
+        else Nav.NavigateTo("/");
+    }
+
+    private async Task SubmitReservation()
+    {
+        isSubmitting = true;
+        var reservation = new ReservationModel 
+        {
+            People = selectedPeople,
+            Date = FullDateString,
+            Time = selectedTime ?? ""
+        };
+
+        try 
+        {
+            var response = await Http.PostAsJsonAsync("reservations", reservation);
+            if(response.IsSuccessStatusCode)
+            {
+                // Show Alert
+                string msg = $"Reservation Confirmed!\n\nGuests: {selectedPeople}\nDate: {FullDateString}\nTime: {selectedTime}";
+                await JS.InvokeVoidAsync("alert", msg);
+                
+                Nav.NavigateTo("/");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            await JS.InvokeVoidAsync("alert", "Failed to connect to server.");
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+}

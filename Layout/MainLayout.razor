@@ -1,0 +1,39 @@
+@inherits LayoutComponentBase
+@inject NavigationManager Nav
+
+<div class="antialiased text-dark min-h-screen flex flex-col">
+    <!-- Navbar -->
+    <nav class="fixed top-0 w-full bg-white/90 backdrop-blur-md z-50 border-b border-gray-200 py-4">
+        <div class="max-w-6xl mx-auto px-6 flex justify-between items-center">
+            <!-- Brand Link -->
+            <a class="text-xl font-serif font-bold tracking-widest hover:text-gold transition cursor-pointer" @onclick='() => Nav.NavigateTo("/")'>
+                The Culinary Heaven Group
+            </a>
+            
+            <!-- Desktop Menu -->
+            <div class="hidden md:flex space-x-8 text-sm font-semibold tracking-wider uppercase text-gray-600 items-center">
+                <a href="/#specialties" class="hover:text-gold transition">Specialties</a>
+                
+                <NavLink href="reservation" class="hover:text-gold transition" Match="NavLinkMatch.All">
+                    Reservations
+                </NavLink>
+                
+                <a href="/#opening" class="hover:text-gold transition">Opening</a>
+                <a href="/#contact" class="hover:text-gold transition">Contact</a>
+                
+                <NavLink href="menu" class="hover:text-gold transition">
+                    Menu
+                </NavLink>
+                
+                <NavLink href="admin" class="text-xs border border-gray-300 px-3 py-1 rounded hover:bg-black hover:text-white hover:border-black transition ml-4">
+                    Admin
+                </NavLink>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Content -->
+    <main class="flex-grow pt-16">
+        @Body
+    </main>
+</div>

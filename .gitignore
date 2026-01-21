@@ -1,0 +1,29 @@
+## Core .NET Build Folders
+[Bb]in/
+[Oo]bj/
+
+## Visual Studio / VS Code
+.vs/
+.vscode/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+## Node.js & Tailwind Dependencies
+node_modules/
+npm-debug.log
+yarn-error.log
+
+## OS Generated Files
+.DS_Store
+Thumbs.db
+
+## Publish Output
+wwwroot/_framework/
+wwwroot/appsettings.Development.json
+Properties/PublishProfiles/
+
+## Environment Specific Configuration
+# (Optional: Uncomment if you have local-only settings)
+# appsettings.Development.json

@@ -1,0 +1,88 @@
+@page "/admin"
+@using RestaurantBlazor.Models
+@inject HttpClient Http
+@inject NavigationManager Nav
+
+<div class="min-h-screen bg-gray-50 font-sans text-gray-800">
+    <header class="bg-white shadow-sm sticky top-0 z-10">
+      <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+        <div class="flex items-center space-x-4">
+          <button @onclick='() => Nav.NavigateTo("/")' class="p-2 hover:bg-gray-100 rounded-full transition">
+            <LucideIcon Name="LucideIcons.ArrowLeft" class="w-5 h-5 text-gray-600" />
+          </button>
+          <h1 class="text-xl font-bold uppercase tracking-wider text-gray-900">Admin Dashboard</h1>
+        </div>
+        <button @onclick="LoadReservations" class="flex items-center space-x-2 text-sm font-semibold text-gold hover:text-black transition">
+          <LucideIcon Name="LucideIcons.RefreshCw" class="w-4 h-4" /> <span>Refresh</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-10">
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        @if (reservations == null)
+        {
+            <div class="p-12 text-center text-gray-500">Loading...</div>
+        }
+        else if (reservations.Count == 0)
+        {
+            <div class="p-12 text-center text-gray-500">No reservations found.</div>
+        }
+        else
+        {
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Created</th>
+                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Date</th>
+                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Time</th>
+                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Guests</th>
+                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Status</th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                  @foreach (var res in reservations)
+                  {
+                      <tr class="hover:bg-gray-50 transition">
+                        <td class="px-6 py-4 whitespace-nowrap text-xs text-gray-400">@res.CreatedAt</td>
+                        <td class="px-6 py-4 text-sm font-medium text-gray-900">@res.Date</td>
+                        <td class="px-6 py-4 text-sm text-gray-500">@res.Time</td>
+                        <td class="px-6 py-4 text-sm text-gray-900">@res.People People</td>
+                        <td class="px-6 py-4">
+                            <span class="px-2 text-xs font-semibold rounded-full bg-green-100 text-green-800 uppercase">
+                                @res.Status
+                            </span>
+                        </td>
+                      </tr>
+                  }
+                </tbody>
+            </table>
+        }
+      </div>
+    </main>
+</div>
+
+@code {
+    // UPDATED: List<ReservationModel>
+    private List<ReservationModel>? reservations;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadReservations();
+    }
+
+    private async Task LoadReservations()
+    {
+        reservations = null;
+        try
+        {
+            // UPDATED: GetFromJsonAsync<List<ReservationModel>>
+            reservations = await Http.GetFromJsonAsync<List<ReservationModel>>("reservations");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            reservations = new List<ReservationModel>();
+        }
+    }
+}
