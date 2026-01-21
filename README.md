@@ -1,4 +1,8 @@
 # Blazor WebAssembly Frontend - Restaurant App
+Watch live at : https://thanblazorrest.netlify.app/
+
+<img width="1632" height="920" alt="image" src="https://github.com/user-attachments/assets/8ca69a73-e1f1-48d3-897c-4cfa3e31d274" />
+
   
 Frontend Summary (Blazor WASM)
 
